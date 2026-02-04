@@ -16,12 +16,12 @@ pipeline {
             agent {
                 docker {
                     image 'composer:2'
-                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock --entrypoint=""'
                 }
             }
             steps {
                 dir('backend') {
-                    sh 'composer install --no-interaction --ignore-platform-reqs'
+                    sh 'composer install --no-interaction --ignore-platform-reqs --no-scripts'
                 }
             }
         }
