@@ -1,3 +1,6 @@
 /.DS_Store
 /BDD
 /bzh
+backend/.env
+backend/.env.dev
+backend/.env.test
