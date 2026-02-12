@@ -13,16 +13,18 @@ class SportContext implements Context
 {
     private EntityManagerInterface $entityManager;
     private SportRepository $sportRepository;
+    private SharedExceptionStorage $exceptionStorage;
     private ?Sport $currentSport = null;
     private array $sports = [];
-    private ?\Exception $lastException = null;
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        SportRepository $sportRepository
+        SportRepository $sportRepository,
+        SharedExceptionStorage $exceptionStorage
     ) {
         $this->entityManager = $entityManager;
         $this->sportRepository = $sportRepository;
+        $this->exceptionStorage = $exceptionStorage;
     }
 
     /**
@@ -49,9 +51,9 @@ class SportContext implements Context
     {
         try {
             $this->jeCreéUnSportDeType($nom, $type);
-            $this->lastException = null;
+            $this->exceptionStorage->setException(null);
         } catch (\Exception $e) {
-            $this->lastException = $e;
+            $this->exceptionStorage->setException($e);
         }
     }
 
@@ -119,7 +121,11 @@ class SportContext implements Context
      */
     public function uneErreurDevraitEtreLevee(): void
     {
-        Assert::assertNotNull($this->lastException, "Une exception devrait avoir été levée");
+        $exception = $this->exceptionStorage->getException();
+            
+        if ($exception === null) {
+            throw new \RuntimeException("Une exception devrait avoir été levée");
+        }
     }
 
     /**

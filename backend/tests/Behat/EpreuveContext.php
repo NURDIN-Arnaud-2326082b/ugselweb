@@ -29,9 +29,9 @@ class EpreuveContext implements Context
         
         $epreuve = new Epreuve();
         $epreuve->setNom($nomEpreuve);
-        $epreuve->setCompetition($competition);
+        $competition->addEpreuve($epreuve);
         
-        $this->entityManager->persist($epreuve);
+        $this->entityManager->persist($competition);
         $this->entityManager->flush();
         
         $this->epreuves[$nomEpreuve] = $epreuve;
@@ -39,6 +39,7 @@ class EpreuveContext implements Context
 
     /**
      * @When /^je crée les épreuves suivantes pour la compétition "([^"]*)":$/
+     * @Given /^les épreuves suivantes pour la compétition "([^"]*)":$/
      */
     public function jeCreéLesEpreuvesSuivantesPourLaCompetition(string $nomCompetition, TableNode $table): void
     {
@@ -47,12 +48,12 @@ class EpreuveContext implements Context
         foreach ($table->getHash() as $row) {
             $epreuve = new Epreuve();
             $epreuve->setNom($row['nom']);
-            $epreuve->setCompetition($competition);
+            $competition->addEpreuve($epreuve);
             
-            $this->entityManager->persist($epreuve);
             $this->epreuves[$row['nom']] = $epreuve;
         }
         
+        $this->entityManager->persist($competition);
         $this->entityManager->flush();
     }
 
