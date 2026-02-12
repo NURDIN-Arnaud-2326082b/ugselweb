@@ -1,3 +1,37 @@
 /.DS_Store
 /BDD
 /bzh
+/old_project
+
+# Backend
+backend/.env
+backend/.env.dev
+backend/.env.test
+backend/.env.local
+backend/.env.*.local
+backend/var/
+backend/vendor/
+backend/public/app/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/cypress/screenshots/
+frontend/cypress/videos/
+frontend/cypress.config.js.bak
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
