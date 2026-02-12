@@ -20,15 +20,46 @@ class SchemaIntegrationTest extends KernelTestCase
             ->get('doctrine')
             ->getManager();
 
+        $this->clearDatabase();
         $this->entityManager->beginTransaction();
     }
 
     protected function tearDown(): void
     {
-        $this->entityManager->rollback();
+        if ($this->entityManager->getConnection()->isTransactionActive()) {
+            $this->entityManager->rollback();
+        }
         $this->entityManager->close();
         
         parent::tearDown();
+    }
+
+    private function clearDatabase(): void
+    {
+        $connection = $this->entityManager->getConnection();
+        $platform = $connection->getDatabasePlatform();
+        
+        if ($platform instanceof \Doctrine\DBAL\Platforms\SqlitePlatform) {
+            $connection->executeStatement('PRAGMA foreign_keys = OFF');
+            
+            $tables = $connection->createSchemaManager()->listTableNames();
+            foreach ($tables as $tableName) {
+                $connection->executeStatement("DELETE FROM `{$tableName}`");
+            }
+            
+            $connection->executeStatement('PRAGMA foreign_keys = ON');
+        } else {
+            $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 0');
+            
+            $tables = $connection->createSchemaManager()->listTableNames();
+            foreach ($tables as $tableName) {
+                $connection->executeStatement("TRUNCATE TABLE `{$tableName}`");
+            }
+            
+            $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
+        }
+        
+        $this->entityManager->clear();
     }
 
     public function testPersistAndRetrieveSport(): void
