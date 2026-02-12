@@ -1,0 +1,17 @@
+default:
+    suites:
+        default:
+            contexts:
+                - App\Tests\Behat\SportContext
+                - App\Tests\Behat\ChampionnatContext
+                - App\Tests\Behat\CompetitionContext
+                - App\Tests\Behat\EpreuveContext
+                - App\Tests\Behat\DatabaseContext
+
+    extensions:
+        FriendsOfBehat\SymfonyExtension:
+            bootstrap: tests/bootstrap.php
+            kernel:
+                class: App\Kernel
+                environment: test
+                debug: true
