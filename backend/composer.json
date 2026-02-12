@@ -7,9 +7,9 @@
         "php": ">=8.2",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "doctrine/doctrine-bundle": "^3.2",
+        "doctrine/doctrine-bundle": "^3.2.2",
         "doctrine/doctrine-migrations-bundle": "^4.0",
-        "doctrine/orm": "^3.6",
+        "doctrine/orm": "^3.6.2",
         "symfony/console": "7.3.*",
         "symfony/dotenv": "7.3.*",
         "symfony/flex": "^2.10",
@@ -76,9 +76,11 @@
         }
     },
     "require-dev": {
-        "phpunit/phpunit": "^12.5.8",
+        "behat/behat": "^3.29",
+        "friends-of-behat/symfony-extension": "^2.6.2",
+        "phpunit/phpunit": "^12.5.11",
         "symfony/browser-kit": "7.2.*",
         "symfony/css-selector": "7.2.*",
-        "symfony/maker-bundle": "^1.65"
+        "symfony/maker-bundle": "^1.66"
     }
 }
