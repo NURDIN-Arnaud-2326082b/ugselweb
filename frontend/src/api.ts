@@ -1,4 +1,8 @@
-const API_URL = 'http://localhost:8000/api';
+// Auto-detect API URL based on environment
+const API_URL = import.meta.env.VITE_API_URL || 
+  (globalThis.window.location.hostname === 'localhost' 
+    ? 'http://localhost:8000/api' 
+    : `${globalThis.window.location.origin}/api`);
 
 export interface Sport {
   id: number;

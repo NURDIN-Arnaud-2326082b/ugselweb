@@ -1,0 +1,93 @@
+name: Deploy to Alwaysdata
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Copy frontend build to backend public directory
+        run: |
+          rm -rf backend/public/app
+          mkdir -p backend/public/app
+          cp -r frontend/dist/* backend/public/app/
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          composer install --no-dev --optimize-autoloader
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.ALWAYSDATA_SSH_KEY }}
+
+      - name: Add Alwaysdata to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ssh-${{ secrets.ALWAYSDATA_ACCOUNT }}.alwaysdata.net >> ~/.ssh/known_hosts
+
+      - name: Deploy to Alwaysdata via rsync
+        run: |
+          rsync -avz --delete \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'node_modules' \
+            --exclude 'frontend/node_modules' \
+            --exclude 'frontend/dist' \
+            --exclude 'frontend/cypress' \
+            --exclude 'backend/var/cache' \
+            --exclude 'backend/var/log' \
+            --exclude 'cypress' \
+            --exclude '.env.local' \
+            --exclude 'backend/.env.local' \
+            --exclude 'old_project' \
+            ./ ${{ secrets.ALWAYSDATA_USER }}@ssh-${{ secrets.ALWAYSDATA_ACCOUNT }}.alwaysdata.net:${{ secrets.ALWAYSDATA_PATH }}
+
+      - name: Clear Symfony cache on server
+        run: |
+          ssh ${{ secrets.ALWAYSDATA_USER }}@ssh-${{ secrets.ALWAYSDATA_ACCOUNT }}.alwaysdata.net << 'EOF'
+            cd ${{ secrets.ALWAYSDATA_PATH }}/backend
+            php bin/console cache:clear --env=prod
+            php bin/console cache:warmup --env=prod
+          EOF
+
+      - name: Run database migrations
+        run: |
+          ssh ${{ secrets.ALWAYSDATA_USER }}@ssh-${{ secrets.ALWAYSDATA_ACCOUNT }}.alwaysdata.net << 'EOF'
+            cd ${{ secrets.ALWAYSDATA_PATH }}/backend
+            php bin/console doctrine:migrations:migrate --no-interaction --env=prod
+          EOF
+
+      - name: Deployment successful
+        run: echo "✅ Déploiement réussi sur Alwaysdata !"
