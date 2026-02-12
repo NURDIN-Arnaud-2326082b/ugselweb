@@ -14,17 +14,19 @@ class ChampionnatContext implements Context
     private EntityManagerInterface $entityManager;
     private ChampionnatRepository $championnatRepository;
     private SportContext $sportContext;
+    private SharedExceptionStorage $exceptionStorage;
     private array $championnats = [];
-    private ?\Exception $lastException = null;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         ChampionnatRepository $championnatRepository,
-        SportContext $sportContext
+        SportContext $sportContext,
+        SharedExceptionStorage $exceptionStorage
     ) {
         $this->entityManager = $entityManager;
         $this->championnatRepository = $championnatRepository;
         $this->sportContext = $sportContext;
+        $this->exceptionStorage = $exceptionStorage;
     }
 
     /**
@@ -38,9 +40,9 @@ class ChampionnatContext implements Context
 
         $championnat = new Championnat();
         $championnat->setNom($nom);
-        $championnat->setSport($sport);
+        $sport->addChampionnat($championnat);
 
-        $this->entityManager->persist($championnat);
+        $this->entityManager->persist($sport);
         $this->entityManager->flush();
 
         $this->championnats[$nom] = $championnat;
@@ -69,9 +71,9 @@ class ChampionnatContext implements Context
             $this->entityManager->persist($championnat);
             $this->entityManager->flush();
             
-            $this->lastException = null;
+            $this->exceptionStorage->setException(null);
         } catch (\Exception $e) {
-            $this->lastException = $e;
+            $this->exceptionStorage->setException($e);
         }
     }
 

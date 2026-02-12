@@ -14,21 +14,24 @@ class CompetitionContext implements Context
     private EntityManagerInterface $entityManager;
     private CompetitionRepository $competitionRepository;
     private ChampionnatContext $championnatContext;
+    private SharedExceptionStorage $exceptionStorage;
     private array $competitions = [];
-    private ?\Exception $lastException = null;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         CompetitionRepository $competitionRepository,
-        ChampionnatContext $championnatContext
+        ChampionnatContext $championnatContext,
+        SharedExceptionStorage $exceptionStorage
     ) {
         $this->entityManager = $entityManager;
         $this->competitionRepository = $competitionRepository;
         $this->championnatContext = $championnatContext;
+        $this->exceptionStorage = $exceptionStorage;
     }
 
     /**
      * @When je crée une compétition :nom pour le championnat :championnatNom
+     * @Given une compétition :nom pour le championnat :championnatNom
      */
     public function jeCreéUneCompetitionPourLeChampionnat(string $nom, string $championnatNom): void
     {
@@ -37,9 +40,9 @@ class CompetitionContext implements Context
 
         $competition = new Competition();
         $competition->setNom($nom);
-        $competition->setChampionnat($championnat);
+        $championnat->addCompetition($competition);
 
-        $this->entityManager->persist($competition);
+        $this->entityManager->persist($championnat);
         $this->entityManager->flush();
 
         $this->competitions[$nom] = $competition;
@@ -68,9 +71,9 @@ class CompetitionContext implements Context
             $this->entityManager->persist($competition);
             $this->entityManager->flush();
             
-            $this->lastException = null;
+            $this->exceptionStorage->setException(null);
         } catch (\Exception $e) {
-            $this->lastException = $e;
+            $this->exceptionStorage->setException($e);
         }
     }
 

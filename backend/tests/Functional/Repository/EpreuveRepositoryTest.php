@@ -43,15 +43,20 @@ class EpreuveRepositoryTest extends KernelTestCase
         $sport->setNom('Gymnastique')->setType('individuel');
 
         $championnat = new Championnat();
-        $championnat->setNom('Jeux Olympiques')->setSport($sport);
+        $championnat->setNom('Jeux Olympiques');
+        
+        $sport->addChampionnat($championnat);
 
         $competition = new Competition();
-        $competition->setNom('Artistique')->setChampionnat($championnat);
+        $competition->setNom('Artistique');
+        
+        $championnat->addCompetition($competition);
 
         $epreuve = new Epreuve();
-        $epreuve->setNom('Barres asymétriques')->setCompetition($competition);
+        $epreuve->setNom('Barres asymétriques');
+        
+        $competition->addEpreuve($epreuve);
 
-        $this->epreuveRepository->save($epreuve);
         $this->entityManager->persist($sport);
         $this->entityManager->flush();
 
@@ -59,7 +64,7 @@ class EpreuveRepositoryTest extends KernelTestCase
 
         $this->assertNotNull($foundEpreuve);
         $this->assertEquals('Barres asymétriques', $foundEpreuve->getNom());
-        $this->assertSame($competition, $foundEpreuve->getCompetition());
+        $this->assertSame($competition->getId(), $foundEpreuve->getCompetition()->getId());
     }
 
     public function testRemoveEpreuve(): void
@@ -68,13 +73,19 @@ class EpreuveRepositoryTest extends KernelTestCase
         $sport->setNom('Judo')->setType('individuel');
 
         $championnat = new Championnat();
-        $championnat->setNom('Championnat National')->setSport($sport);
+        $championnat->setNom('Championnat National');
+        
+        $sport->addChampionnat($championnat);
 
         $competition = new Competition();
-        $competition->setNom('Catégorie -60kg')->setChampionnat($championnat);
+        $competition->setNom('Catégorie -60kg');
+        
+        $championnat->addCompetition($competition);
 
         $epreuve = new Epreuve();
-        $epreuve->setNom('Finale')->setCompetition($competition);
+        $epreuve->setNom('Finale');
+        
+        $competition->addEpreuve($epreuve);
 
         $this->entityManager->persist($sport);
         $this->entityManager->flush();
@@ -94,23 +105,28 @@ class EpreuveRepositoryTest extends KernelTestCase
         $sport->setNom('Boxe')->setType('individuel');
 
         $championnat = new Championnat();
-        $championnat->setNom('Gala de Boxe')->setSport($sport);
+        $championnat->setNom('Gala de Boxe');
+        
+        $sport->addChampionnat($championnat);
 
         $competition = new Competition();
-        $competition->setNom('Mi-lourds')->setChampionnat($championnat);
+        $competition->setNom('Mi-lourds');
+        
+        $championnat->addCompetition($competition);
 
         $epreuve1 = new Epreuve();
-        $epreuve1->setNom('Quart de finale')->setCompetition($competition);
+        $epreuve1->setNom('Quart de finale');
 
         $epreuve2 = new Epreuve();
-        $epreuve2->setNom('Demi-finale')->setCompetition($competition);
+        $epreuve2->setNom('Demi-finale');
 
         $epreuve3 = new Epreuve();
-        $epreuve3->setNom('Finale')->setCompetition($competition);
+        $epreuve3->setNom('Finale');
 
-        $this->epreuveRepository->save($epreuve1);
-        $this->epreuveRepository->save($epreuve2);
-        $this->epreuveRepository->save($epreuve3);
+        $competition->addEpreuve($epreuve1);
+        $competition->addEpreuve($epreuve2);
+        $competition->addEpreuve($epreuve3);
+        
         $this->entityManager->persist($sport);
         $this->entityManager->flush();
 

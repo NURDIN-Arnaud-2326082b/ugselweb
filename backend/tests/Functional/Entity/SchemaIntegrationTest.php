@@ -89,8 +89,9 @@ class SchemaIntegrationTest extends KernelTestCase
         $sport->setNom('Basketball')->setType('collectif');
 
         $championnat = new Championnat();
-        $championnat->setNom('Championnat de France')
-                    ->setSport($sport);
+        $championnat->setNom('Championnat de France');
+        
+        $sport->addChampionnat($championnat);
 
         $competition1 = new Competition();
         $competition1->setNom('Poule A');
@@ -107,11 +108,13 @@ class SchemaIntegrationTest extends KernelTestCase
 
         $this->entityManager->persist($sport);
         $this->entityManager->flush();
+        
+        $championnatId = $championnat->getId();
         $this->entityManager->clear();
 
         $championnatFromDb = $this->entityManager
             ->getRepository(Championnat::class)
-            ->find($championnat->getId());
+            ->find($championnatId);
 
         $this->assertNotNull($championnatFromDb);
         $this->assertCount(3, $championnatFromDb->getCompetitions());
@@ -288,10 +291,14 @@ class SchemaIntegrationTest extends KernelTestCase
         $sport->setNom('Athlétisme')->setType('individuel');
 
         $championnat = new Championnat();
-        $championnat->setNom('Championnats de France')->setSport($sport);
+        $championnat->setNom('Championnats de France');
+        
+        $sport->addChampionnat($championnat);
 
         $competition = new Competition();
-        $competition->setNom('Sprint')->setChampionnat($championnat);
+        $competition->setNom('Sprint');
+        
+        $championnat->addCompetition($competition);
 
         $epreuve1 = new Epreuve();
         $epreuve1->setNom('100m');
@@ -308,11 +315,13 @@ class SchemaIntegrationTest extends KernelTestCase
 
         $this->entityManager->persist($sport);
         $this->entityManager->flush();
+        
+        $competitionId = $competition->getId();
         $this->entityManager->clear();
 
         $competitionFromDb = $this->entityManager
             ->getRepository(Competition::class)
-            ->find($competition->getId());
+            ->find($competitionId);
 
         $this->assertNotNull($competitionFromDb);
         $this->assertCount(3, $competitionFromDb->getEpreuves());
@@ -332,16 +341,23 @@ class SchemaIntegrationTest extends KernelTestCase
         $sport->setNom('Natation')->setType('individuel');
 
         $championnat = new Championnat();
-        $championnat->setNom('Championnats du Monde')->setSport($sport);
+        $championnat->setNom('Championnats du Monde');
+        
+        $sport->addChampionnat($championnat);
 
         $competition = new Competition();
-        $competition->setNom('Nage Libre')->setChampionnat($championnat);
+        $competition->setNom('Nage Libre');
+        
+        $championnat->addCompetition($competition);
 
         $epreuve1 = new Epreuve();
-        $epreuve1->setNom('50m Nage Libre')->setCompetition($competition);
+        $epreuve1->setNom('50m Nage Libre');
         
         $epreuve2 = new Epreuve();
-        $epreuve2->setNom('100m Nage Libre')->setCompetition($competition);
+        $epreuve2->setNom('100m Nage Libre');
+        
+        $competition->addEpreuve($epreuve1);
+        $competition->addEpreuve($epreuve2);
 
         $this->entityManager->persist($sport);
         $this->entityManager->flush();

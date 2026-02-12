@@ -123,28 +123,35 @@ class CompetitionRepositoryTest extends KernelTestCase
         $sport->setNom('Athlétisme')->setType('individuel');
 
         $championnat = new Championnat();
-        $championnat->setNom('Championnats de France')->setSport($sport);
+        $championnat->setNom('Championnats de France');
+        
+        $sport->addChampionnat($championnat);
 
         $competition = new Competition();
-        $competition->setNom('Sprint')->setChampionnat($championnat);
+        $competition->setNom('Sprint');
+        
+        $championnat->addCompetition($competition);
 
         $epreuve1 = new Epreuve();
-        $epreuve1->setNom('100m')->setCompetition($competition);
+        $epreuve1->setNom('100m');
         
         $epreuve2 = new Epreuve();
-        $epreuve2->setNom('200m')->setCompetition($competition);
+        $epreuve2->setNom('200m');
+        
+        $competition->addEpreuve($epreuve1);
+        $competition->addEpreuve($epreuve2);
 
         $this->entityManager->persist($sport);
-        $this->entityManager->persist($championnat);
-        $this->competitionRepository->save($competition, true);
+        $this->entityManager->flush();
 
         $this->assertNotNull($competition->getId());
         $this->assertNotNull($epreuve1->getId());
         $this->assertNotNull($epreuve2->getId());
         
+        $competitionId = $competition->getId();
         $this->entityManager->clear();
         
-        $competitionFromDb = $this->competitionRepository->find($competition->getId());
+        $competitionFromDb = $this->competitionRepository->find($competitionId);
         $this->assertNotNull($competitionFromDb);
         $this->assertCount(2, $competitionFromDb->getEpreuves());
     }
