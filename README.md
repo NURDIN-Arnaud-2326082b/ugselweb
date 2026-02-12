@@ -1,7 +1,7 @@
 ## Démarrage Rapide
 
 ### Prérequis
-- PHP 8.2+
+- PHP 8.4+
 - Composer
 - Node.js 20+
 - MySQL 8.0+
